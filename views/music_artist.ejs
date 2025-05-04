@@ -1,0 +1,320 @@
+<%- include("./includes/head.ejs"); %>
+
+<link rel="stylesheet" href="/cat.css">
+
+<body>
+	<header>
+		<%- include("./includes/navbar.ejs"); %>
+	</header>
+
+	<div class="loading-spinner" id="loadingSpinner">
+	    <img src="https://i.ibb.co/PTLFqC0/cube.png" alt="Your Logo" class="logoSp">
+	    <div class="spinner"></div>
+	</div>
+
+	<section>
+		<div class="container-fluid border-0 p-0" style="margin-top: 100px;">
+			<div class="row justify-content-center">
+		        <div class="col-12 text-center">
+		          	<% if(errorMessage) { %>
+		            	<div class="alert alert-danger" role="alert"><%= errorMessage %></div>
+		          	<% } %>
+		        </div>
+
+		        <div class="col-12 col-sm-12 col-lg-3 cat_div1"></div>
+
+		        <div class="col-12 col-sm-12 col-lg-6 border cat_div2">
+		        	<h3 class="text-center">
+					    <% if (!editing) { %>Add<% } else { %>Edit<% } %> Artist
+					</h3>
+
+		        	<div>
+		        		<form action="/v1<% if(editing) { %>/viewArtist/<%= sid %><% } else { %>/addArtist<% } %>" method="POST">
+                  <!-- name -->
+			        		<div class="mb-3">
+                    <label for="inputcat" class="form-label"></label>
+                    <input type="text" class="form-control" name="name" id="inputcat" aria-describedby="emailHelp" placeholder="enter name..." value="<%= oldInput.name %>">
+                  </div>
+                  
+                  <!-- image -->
+                    <div class="mb-3" id="logo_div">
+                        <div style="display: none;">
+                          <label for="formFile" class="form-label">Image</label>
+                          <div>
+                            <img src="" class="img-thumbnail" alt="..." width="300" height="300" id="logoImg" loading="lazy">
+                          </div>
+                        </div>
+                        <div>
+                          <label for="formFile" class="form-label">Image</label>
+                          <input class="form-control" type="file" id="formFile" accept="image/*">
+                          <input type="hidden" name="image" id="formNameFile" value="<%= oldInput.image %>">
+                        </div>
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-2 d-flex align-items-center justify-content-between">
+                          <button type="button" class="btn upload-limage-btn border-0">
+                              <i class="fa-solid fa-cloud-arrow-up"></i>
+                          </button>
+                          <button type="button" class="btn delete-l-button">
+                              <i class="fa-solid fa-trash" style="color: red;"></i>
+                          </button>
+                          <div id="spinner_sub" class="spinner-border" role="status" style="display: none;">
+                              <span class="sr-only">Loading...</span>
+                          </div>
+                        </div>
+                    </div>
+                  
+                          <!-- portrait image -->
+<!-- 								<div class="mb-3" id="portrait_div">
+				                    <div style="display: none;">
+				                        <label for="formFile1" class="form-label">Portrait Image</label>
+				                        <div>
+				                        	<img src="" class="img-thumbnail" alt="..." width="300" height="300" id="portImg" loading="lazy">
+				                        </div>
+				                    </div>
+				                    <div>
+				                        <label for="formFile" class="form-label">Portrait Image</label>
+				                        <input class="form-control" type="file" id="formFileP" accept="image/*">
+				                        <input type="hidden" name="portrait_image" id="formNameFileP" value="<%= oldInput.portrait_image %>">
+				                    </div>
+				                    <div class="col-12 col-sm-12 col-md-12 col-lg-2 d-flex align-items-center justify-content-between">
+				                        <button type="button" class="btn upload-Pimage-btn border-0">
+				                            <i class="fa-solid fa-cloud-arrow-up"></i>
+				                        </button>
+					                        <button type="button" class="btn delete-P-button">
+				                                <i class="fa-solid fa-trash" style="color: red;"></i>
+				                            </button>
+				                        <div id="spinner_subP" class="spinner-border" role="status" style="display: none;">
+				                            <span class="sr-only">Loading...</span>
+				                        </div>
+				                    </div>
+				                </div> -->
+                  
+                  <!-- social media handles -->
+                  <div class="mb-3">
+								  	<label for="exampleFormControlTextarea1" class="form-label">Social Media Handles</label>
+								  	<textarea class="form-control desc_box" name="sm" id="exampleFormControlTextarea1" rows="5">
+                      <%= oldInput.sm %>
+								  	</textarea>
+								  </div>
+                    
+                  <div class="text-center mb-3">
+                    <% if (editing) { %>
+                      <input type="hidden" name="cid" value="<%= sid %>">
+                    <% } %>
+                      <button type="submit" class="btn btn-primary" id="subBtn">
+                        <% if (!editing) { %>SUBMIT<% } else { %>UPDATE<% } %>
+                      </button>
+                  </div>
+			        	</form>
+			        </div>
+			    </div>
+
+			    <div class="col-12 col-sm-12 col-lg-3"></div>
+
+		        <div class="col-12" style="margin-top: 50px;"></div>
+		    </div>
+		</div>
+	</section>
+
+	<footer></footer>
+                  
+  <script>
+		let oi = '<%= JSON.stringify(oldInput) %>';
+		let editing = '<%= editing %>';
+	</script>
+
+	<script>
+		window.addEventListener('load', function () {
+	      // console.log("hii...");
+	      // Get the loading spinner element
+	      const loadingSpinner = document.getElementById('loadingSpinner');
+	        
+	      // Hide the loading spinner
+	      loadingSpinner.style.display = 'none';
+	    });
+
+	    globalThis.document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                const alertElement = document.querySelector('.alert-danger');
+                if (alertElement) {
+                    alertElement.style.display = 'none';
+                }
+            }, 3000); // 3000 milliseconds = 3 seconds
+        
+             const oldInput = JSON.parse(oi.replace(/&#34;/g, '"').replace(/[\x00-\x1F\x7F]/g, ''));
+        
+            // console.log(oldInput);
+
+			       const form = globalThis.document.getElementById('searchForm');
+			       const submitButton = globalThis.document.getElementById('subBtn');
+            const spinner = document.getElementById('spinner-border');
+
+            const brandDiv = globalThis.document.getElementById('logo_div');
+        
+            function decodeHtmlEntities(str) {
+              let doc = new DOMParser().parseFromString(str, "text/html");
+              return doc.documentElement.textContent || doc.body.textContent;
+            }
+        
+            const descriptionContainer1 = document.getElementById('exampleFormControlTextarea1');
+
+            // Get the raw value inside the textarea, which is where the content actually resides
+            const descriptionLines1 = descriptionContainer1.value.trim();
+
+            // Decode the HTML entities
+            const decodedDescription = decodeHtmlEntities(descriptionLines1);
+        
+            globalThis.document.querySelectorAll('.upload-limage-btn')
+            	.forEach(button => {
+                  button.addEventListener('click', function(e) {
+                    // const dataID = this.getAttribute('data-id');
+                    uploadLogoImage(this);
+                  });
+			        });
+
+	        document.addEventListener("change", function (event) {
+	          if (event.target.matches(".file-input")) {
+	            const fileInput = event.target;
+	            const fileNameDisplay = fileInput.nextElementSibling.nextElementSibling.nextElementSibling; // The third sibling is the file-name span
+
+	            // console.log(fileInput, fileNameDisplay);
+
+	            const file = fileInput.files[0];
+	            // console.log(file);
+	            if (file) {
+	              fileNameDisplay.textContent = file.name;
+	            } else {
+	              fileNameDisplay.textContent = "No file chosen";
+	            }
+	          }
+	        });
+
+	        function uploadLogoImage(btn) {
+	          	// console.log("logo....", btn, id);
+            
+		        submitButton.style.display = 'none';
+		        btn.disabled = true;
+
+		        const formFile = globalThis.document.getElementById(`formFile`);
+
+		        const file = formFile.files[0];
+
+		        if (formFile.files.length === 0) {
+		            alert('Please select a image to upload.');
+		            btn.disabled = false;
+		            submitButton.style.display = 'block';
+		            return;
+		        }
+
+		        else if (file) {
+		        	submitButton.style.display = 'block';
+		            // console.log(file.name);
+		            function isVideoExtension(extension) {
+		              const videoExtensions = [".png", ".jpg", ".jpeg", ".webp", ".avif"];
+		              return videoExtensions.includes(extension.toLowerCase());
+		            }
+		            const extension = file.name.match(/\.([^\.]+)$/);
+
+		            if (extension) {
+		              const extractedExtension = extension[1].toLowerCase(); // Convert to lowercase for case-insensitive comparison
+		              const isVideo = isVideoExtension("." + extractedExtension); // Add dot prefix
+		              // console.log(isVideo);
+		              if (!isVideo) {
+		                alert('Please select a image to upload.');
+		                btn.disabled = false;
+		                // const fileNameDisplay = fileInput.nextElementSibling.nextElementSibling.nextElementSibling; // The third sibling is the file-name span
+		                formFile.value = "";
+		                return;
+		              }
+		            } else {
+		              console.log("No extension found");
+		            }
+		        }
+
+		        submitButton.style.display = 'none';
+
+		        const spinner = document.getElementById(`spinner_sub`);
+		        spinner.style.display = 'block';
+
+		        const formdata = new FormData();
+		        formdata.append("fileToUpload", file);
+
+		        const requestOptions = {
+		            method: "POST",
+		            body: formdata,
+		            redirect: "follow"
+		        };
+
+		        fetch("https://api.hiphopboombox.com/api/uploadImage.php", requestOptions)
+		            .then((response) => response.json())
+		            .then((result) => {
+		              // console.log(result);
+		              if (result.isSuccess == true) {
+		                spinner.style.display = 'none';
+		                btn.parentElement.style.display = 'none';
+		                globalThis.document.getElementById(`formNameFile`).value = result.image;
+		                btn.parentElement.previousElementSibling.style.display = 'none';
+		                const showDiv = btn.parentElement.previousElementSibling.previousElementSibling;
+
+			        	    const logo_img = showDiv.querySelector(`#logoImg`);
+
+			        	    logo_img.setAttribute("src", `https://api.hiphopboombox.com/api/uploads/${result.image}`);
+
+			        	    showDiv.style.display = 'block';
+
+		                btn.parentElement.previousElementSibling.previousElementSibling.style.display = 'block';
+		                btn.parentElement.parentElement.style.marginBottom = '50px';
+		                submitButton.style.display = 'block';
+		              }
+		              else {
+		                alert(result.errorMsg);
+		                btn.disabled = false;
+		                file.value = '';
+		                spinner.style.display = 'none';
+		                return;
+		              }
+		            })
+		            .catch((error) => console.error(error));
+        	}
+
+        	if (oldInput.image !== '') {
+        		// logoDiv.style.marginTop = '50px';
+        		// logoDiv.style.border = '2px solid red';
+            	const firstDiv = brandDiv.querySelectorAll('div')[0];
+              const secondDiv = brandDiv.querySelectorAll('div')[2];
+              const thirdDiv = brandDiv.querySelectorAll('div')[3];
+
+              const button = thirdDiv.querySelector('i.fa-cloud-arrow-up').parentElement;
+              const logo_img = firstDiv.querySelector("#logoImg");
+
+              // console.log(firstDiv, secondDiv);
+              // console.log(thirdDiv, button);
+              //console.log(logo_img);
+
+                logo_img.setAttribute("src", `https://api.hiphopboombox.com/api/uploads/${oldInput.image}`);
+
+              firstDiv.style.display = 'block';
+              secondDiv.style.display = 'none';
+              button.disabled = true;
+         	}
+        
+          globalThis.document.querySelectorAll('.delete-l-button').forEach(button => {
+		        button.addEventListener('click', function(e) {
+                // const dataID = this.getAttribute('data-id');
+		            deleteLogoImage(this);
+		        });
+		      })
+
+          function deleteLogoImage(btn) {
+              globalThis.document.getElementById(`formFile`).value = '';
+              globalThis.document.getElementById(`formNameFile`).value = '';
+              btn.previousElementSibling.style.display = 'block';
+              btn.previousElementSibling.disabled = false;
+              btn.parentElement.previousElementSibling.style.display = 'block';
+              btn.parentElement.previousElementSibling.previousElementSibling.style.display = 'none';
+          }
+      });
+	</script>
+
+<%- include("./includes/end.ejs"); %>
+
+</body>
