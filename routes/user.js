@@ -4622,7 +4622,7 @@ router.post(
       }
       
       else {
-        if (!des || !link_android || !link_ios) {
+        if (des.trim() !== "" || !link_android || !link_ios) {
           return res.render("add_ads", {
             title1: "Add Advertisement",
             editing: false,
